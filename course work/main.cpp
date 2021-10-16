@@ -1,14 +1,20 @@
-//
-//  main.cpp
-//  course work
-//
-//  Created by Илья Грицацуев on 09.10.2021.
-//
-
+#include "Wave_finder.hpp"
 #include <iostream>
+using namespace std;
 
-int main(int argc, const char * argv[]) {
-    // insert code here...
-    std::cout << "Hello, World!\n";
-    return 0;
+int main ()
+{
+    char str[128];// = "/Users/gratchuvalsky/Desktop/input.txt";
+    cout<<" Enter the path to the file:\n";
+    gets(str);
+    //cout<<str;
+    
+    WayMatrix mat(str);
+    finder a(mat);
+    a.find();
+    //a.find_start_finish(mat);
+    //mat.get(1,1);
+    
+    
+    
 }
