@@ -15,10 +15,10 @@
     }
 
 
-    void WayMatrix::push(eCell aCell)
+    void WayMatrix::insert(unsigned aLine,unsigned aColumn, eCell aCell)
     {
           if(mMatrix.size() <= mLines * mColumns)
-            mMatrix.push_back(aCell);
+            mMatrix[aLine * mColumns + aColumn] = aCell;
     }
 
 
@@ -43,10 +43,10 @@
                 for(unsigned l = 0; l < lines; ++l)
                 {
                         file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                        //file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        
                         for(unsigned c = 0; c < columns; ++c)
                         {
-                            //file.ignore(std::numeric_limits<std::streamsize>::max(), ' ');
+                            
                             switch (file.get())
                             {
                                   case '1':
@@ -118,7 +118,7 @@
     }
 
 
-    finder::finder(const WayMatrix &aMatrix)
+    finder::finder(WayMatrix &aMatrix)
         :mMatrix(aMatrix)
     {
           std::pair<point, point> res;
@@ -184,6 +184,10 @@
                                             out<<"4 ";
                                             break;
                                         }
+                                        case WAY: {
+                                            out<<"* ";
+                                            break;
+                                        }
                                     }
                             }
                     }
@@ -201,10 +205,10 @@
     }
 
 
-    const std::stack<eDirection> &finder::get()const
-    {
-        return mPath;
-    }
+   // const std::stack<eDirection> &finder::get()const
+   // {
+    //    return mPath;
+   // }
 
 
     std::pair<bool, point> finder::is_moving_up(std::vector<unsigned> &aArr,
@@ -361,7 +365,8 @@
         auto down = val;
         auto right = val;
         auto left = val;
-
+        
+        
         while(!mPath.empty())
             mPath.pop();
 
@@ -407,28 +412,32 @@
                 case 1: // up
                 {
                     dl = 1;
-                    mPath.push(eDirection::DOWN);
+                    mPath.push({eDirection::DOWN, {ln+dl, cn+dc}});
+                    mMatrix.insert(ln+dl, cn+dc, eCell::WAY);
                     break;
                 }
           
                 case 3: // right
                 {
                     dc = -1;
-                    mPath.push(eDirection::LEFT);
+                    mPath.push({eDirection::LEFT, {ln+dl, cn+dc}});
+                    mMatrix.insert(ln+dl, cn+dc, eCell::WAY);
                     break;
                 }
           
                 case 5: // down
                 {
                     dl = -1;
-                    mPath.push(eDirection::UP);
+                    mPath.push({eDirection::UP, {ln+dl, cn+dc}});
+                    mMatrix.insert(ln+dl, cn+dc, eCell::WAY);
                     break;
                 }
           
                 case 7: // left
                 {
                     dc = 1;
-                    mPath.push(eDirection::RIGHT);
+                    mPath.push({eDirection::RIGHT, {ln+dl, cn+dc}});
+                    mMatrix.insert(ln+dl, cn+dc, eCell::WAY);
                     break;
                 }
           

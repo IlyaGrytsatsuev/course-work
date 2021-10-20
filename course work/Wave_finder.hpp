@@ -48,7 +48,7 @@
      // WayMatrix &operator=(const WayMatrix &&) = delete;
 
             eCell get(unsigned, unsigned)const;
-            void push(eCell);
+            void insert(unsigned aLine,unsigned aColumn, eCell aCell);
             const unsigned &lines()const;
             const unsigned &columns()const;
     };
@@ -65,12 +65,13 @@
                 bool mIsFound{false};
                 point mStart{0,0};
                 point mFinish{0,0};
-                const WayMatrix &mMatrix;
-                std::stack<eDirection>  mPath;
+                WayMatrix &mMatrix;
+                //std::pair<eDirection,point>;
+                std::stack<std::pair<eDirection,point>>  mPath;
       
         
             public:
-                finder(const WayMatrix&);
+                finder( WayMatrix&);
       //finder(const finder &) = delete;
       //finder &operator=(const finder &) = delete;
 
