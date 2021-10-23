@@ -28,6 +28,7 @@
         ,LEFT
     };
 
+using point = std::pair<unsigned, unsigned>;
 
         class WayMatrix
         {
@@ -38,58 +39,48 @@
                 std::vector<eCell> mMatrix;
       
             public:
-        //WayMatrix(std::initializer_list<eCell>, unsigned aColumns);
-                WayMatrix(unsigned aLines, unsigned aColumns);
-                ~WayMatrix() = default;
-                WayMatrix(char* str);
-      //WayMatrix(const WayMatrix &) = delete;
-     // WayMatrix &operator=(const WayMatrix &) = delete;
-      //WayMatrix(const WayMatrix &&) = delete;
-     // WayMatrix &operator=(const WayMatrix &&) = delete;
-
-            eCell get(unsigned, unsigned)const;
-            void insert(unsigned aLine,unsigned aColumn, eCell aCell);
-            const unsigned &lines()const;
-            const unsigned &columns()const;
+                
+                
+                WayMatrix();
+                ~WayMatrix(); //= default;
+                void get_data(char* str);
+                eCell get(unsigned, unsigned)const;
+                void insert(unsigned aLine,unsigned aColumn, eCell aCell);
+                const unsigned &lines()const;
+                const unsigned &columns()const;
     };
 
+    using point = std::pair<unsigned, unsigned>;
+    
+    class finder
+    {
+        private:
+            
+            unsigned mMaxCellCost;
+            bool mIsFound{false};
+            point mStart{0,0};
+            point mFinish{0,0};
+            WayMatrix &mat;
+            std::vector<unsigned> aArr;
 
-        using point = std::pair<unsigned, unsigned>;
+        public:
+            
+            finder( WayMatrix&);
+            void find();
+            std::pair<point, point> find_start_finish();
+            const bool &isFound()const;
+            void generate_wave(std::vector<unsigned>&);
+            void _patch_building(std::vector<unsigned>&);
+            void file_output(const char* str);
 
-    //typedef void (*pf_next)();
+            std::pair<bool, point> is_moving_up(unsigned aL, unsigned aC);
+            std::pair<bool, point> is_moving_left( unsigned aL, unsigned aC);
+            std::pair<bool, point> is_moving_right( unsigned aL, unsigned aC);
+            std::pair<bool, point> is_moving_down( unsigned aL, unsigned aC);
 
-        class finder
-        {
-            private:
-                unsigned mMaxCellCost;
-                bool mIsFound{false};
-                point mStart{0,0};
-                point mFinish{0,0};
-                WayMatrix &mMatrix;
-                //std::pair<eDirection,point>;
-                std::stack<std::pair<eDirection,point>>  mPath;
-      
+    };
+
         
-            public:
-                finder( WayMatrix&);
-      //finder(const finder &) = delete;
-      //finder &operator=(const finder &) = delete;
-
-                void find();
-                const bool &isFound()const;
-                const std::stack<eDirection> &get()const;
-                void _find_neumann(std::vector<unsigned>&);
-                void _patch_building(std::vector<unsigned>&);
-                void file_output(const char* str);
-
-                std::pair<bool, point> is_moving_up(std::vector<unsigned>&, unsigned, unsigned);
-                std::pair<bool, point> is_moving_left(std::vector<unsigned>&, unsigned, unsigned);
-                std::pair<bool, point> is_moving_right(std::vector<unsigned>&, unsigned, unsigned);
-                std::pair<bool, point> is_moving_down(std::vector<unsigned>&, unsigned, unsigned);
-
-                std::pair<point, point> find_start_finish(const WayMatrix &aMatrix);
-    };
-
 
 
 #endif /* Wave_finder_hpp */

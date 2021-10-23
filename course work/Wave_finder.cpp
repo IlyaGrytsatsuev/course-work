@@ -7,25 +7,30 @@
 #include <iostream>
    
 
-    WayMatrix::WayMatrix(unsigned aLines, unsigned aColumns)
+    WayMatrix::WayMatrix()
     {
-          mMatrix.reserve(aLines * aColumns);
-          mLines   = aLines;
-          mColumns = aColumns;
+          mMatrix.reserve(1);
+          mLines   = 0;
+          mColumns = 0;
     }
 
+    WayMatrix::~WayMatrix()
+    {
+        mMatrix.clear();
+    }
 
     void WayMatrix::insert(unsigned aLine,unsigned aColumn, eCell aCell)
     {
-          if(mMatrix.size() <= mLines * mColumns)
-            mMatrix[aLine * mColumns + aColumn] = aCell;
+        if(aLine >= mLines || aColumn > mColumns)
+            throw "ERROR!!! DEFINITION IS OUT OF RANGE!!";
+        
+        mMatrix[aLine*mColumns + aColumn] = aCell;
     }
 
 
-    WayMatrix::WayMatrix(char*str)
+    void WayMatrix::get_data(char*str)
     {
               std::ifstream file{str};
-        //int tmp = 0;
 
               if(file.is_open())
               {
@@ -38,7 +43,6 @@
                       mLines   = lines;
                       mColumns = columns;
 
-               // mpMatrix = new WayMatrix(lines, columns);
                   file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 for(unsigned l = 0; l < lines; ++l)
                 {
@@ -75,7 +79,7 @@
               }
               
               else
-                  std::cout<<"File is not open";
+                  throw "File is not open";
         }
 
 
@@ -93,24 +97,26 @@
 
     eCell WayMatrix::get(unsigned aLine, unsigned aColumn)const
     {
-          if((aLine * aColumn) < mMatrix.size())
-              return mMatrix[aLine * mColumns + aColumn];
-                return eCell::UNFREE;
+          if(aLine >= mLines || aColumn > mColumns)
+              throw "ERROR!!! DEFINITION IS OUT OF RANGE!!";
+            
+            return mMatrix[aLine * mColumns + aColumn];
+               // return eCell::UNFREE;
     }
 
 
 
-    std::pair<point, point> finder::find_start_finish(const WayMatrix &a)
+    std::pair<point, point> finder::find_start_finish()
     {
           std::pair<point, point> res{{0,0},{0,0}};
 
-          for(unsigned l = 0; l < a.lines();l++)
-                for(unsigned c = 0; c < a.columns(); c++)
+          for(unsigned l = 0; l < mat.lines();l++)
+                for(unsigned c = 0; c < mat.columns(); c++)
                 {
-                    if(a.get(l, c) == eCell::START)
+                    if(mat.get(l, c) == eCell::START)
                         res.first = {l,c};
                     
-                    if(a.get(l, c) == eCell::FINISH)
+                    if(mat.get(l, c) == eCell::FINISH)
                         res.second = {l,c};
                 }
         
@@ -119,31 +125,28 @@
 
 
     finder::finder(WayMatrix &aMatrix)
-        :mMatrix(aMatrix)
+        :mat(aMatrix)
     {
           std::pair<point, point> res;
-          res = find_start_finish(aMatrix);
+          res = find_start_finish();
           mStart  = res.first;
           mFinish = res.second;
           mMaxCellCost = aMatrix.columns() * aMatrix.lines();
+          aArr.resize(mat.lines() * mat.columns(),mMaxCellCost);
     }
 
 
     void finder::find()
     {
-          std::vector<unsigned> arr;
-          arr.resize(mMatrix.lines() * mMatrix.columns(),mMaxCellCost);
 
-          //mFindType = aType;
-
-          arr[mStart.first * mMatrix.columns() + mStart.second] = 0;
+        aArr[mStart.first * mat.columns() + mStart.second] = 0;
           
           mIsFound = false;
 
-          _find_neumann(arr);
+        generate_wave(aArr);
           
           if(mIsFound)
-               _patch_building(arr);
+              _patch_building(aArr);
     
     }
 
@@ -156,14 +159,14 @@
               if(out.is_open())
               {
 
-                    for(unsigned l = 0; l < mMatrix.lines(); ++l)
+                    for(unsigned l = 0; l < mat.lines(); ++l)
                     {
                             out<<"\n";
                         
-                            for(unsigned c = 0; c < mMatrix.columns(); ++c)
+                            for(unsigned c = 0; c < mat.columns(); ++c)
                             {
             
-                                    switch (mMatrix.get(l,c))
+                                    switch (mat.get(l,c))
                                     {
                                         case START:
                                         {
@@ -205,34 +208,27 @@
     }
 
 
-   // const std::stack<eDirection> &finder::get()const
-   // {
-    //    return mPath;
-   // }
 
-
-    std::pair<bool, point> finder::is_moving_up(std::vector<unsigned> &aArr,
-                                                unsigned aL,
-                                                unsigned aC)
+    std::pair<bool, point> finder::is_moving_up (unsigned aL, unsigned aC)
     {
         std::pair<bool, point> res{false,{0,0}};
 
         if(aL>0)
         {
             auto l   = aL - 1;
-            auto val = aArr[aL*mMatrix.columns() + aC] + 1;
+            auto val = aArr[aL*mat.columns() + aC] + 1;
 
-            if(mMatrix.get(l, aC) == eCell::FINISH)
+            if(mat.get(l, aC) == eCell::FINISH)
                 mIsFound = true;
 
-            if(mMatrix.get(l, aC) == eCell::FREE)
+            if(mat.get(l, aC) == eCell::FREE)
             {
-                if(aArr[l*mMatrix.columns() + aC] == mMaxCellCost)
+                if(aArr[l*mat.columns() + aC] == mMaxCellCost)
                 {
                     res.first         = true;
                     res.second.first  = l;
                     res.second.second = aC;
-                    aArr[l*mMatrix.columns() + aC] = val;
+                    aArr[l*mat.columns() + aC] = val;
                 }
             }
         }
@@ -240,27 +236,25 @@
     }
 
 
-    std::pair<bool, point> finder::is_moving_left(std::vector<unsigned> &aArr,
-                                                  unsigned aL,
-                                                  unsigned aC)
+    std::pair<bool, point> finder::is_moving_left(unsigned aL, unsigned aC)
     {
         std::pair<bool, point> res{false,{0,0}};
         if(aC>0)
         {
             auto c   = aC - 1;
-            auto val = aArr[aL*mMatrix.columns() + aC] + 1;
+            auto val = aArr[aL*mat.columns() + aC] + 1;
 
-            if(mMatrix.get(aL, c) == eCell::FINISH)
+            if(mat.get(aL, c) == eCell::FINISH)
                 mIsFound = true;
 
-            if(mMatrix.get(aL, c) == eCell::FREE)
+            if(mat.get(aL, c) == eCell::FREE)
             {
-                if(aArr[aL*mMatrix.columns() + c] == mMaxCellCost)
+                if(aArr[aL*mat.columns() + c] == mMaxCellCost)
                 {
                     res.first         = true;
                     res.second.first  = aL;
                     res.second.second = c;
-                    aArr[aL*mMatrix.columns() + c] = val;
+                    aArr[aL*mat.columns() + c] = val;
                 }
             }
         }
@@ -268,61 +262,57 @@
     }
 
 
-    std::pair<bool, point> finder::is_moving_right(std::vector<unsigned> &aArr,
-                                                   unsigned aL,
-                                                   unsigned aC)
+    std::pair<bool, point> finder::is_moving_right(unsigned aL, unsigned aC)
     {
         std::pair<bool, point> res{false,{0,0}};
-        if(aC<mMatrix.columns() - 1)
+        if(aC<mat.columns() - 1)
         {
             auto c   = aC + 1;
-            auto val = aArr[aL*mMatrix.columns() + aC] + 1;
+            auto val = aArr[aL*mat.columns() + aC] + 1;
 
-            if(mMatrix.get(aL, c) == eCell::FINISH)
+            if(mat.get(aL, c) == eCell::FINISH)
                 mIsFound = true;
 
-            if(mMatrix.get(aL, c) == eCell::FREE)
+            if(mat.get(aL, c) == eCell::FREE)
             {
-                if(aArr[aL*mMatrix.columns() + c] == mMaxCellCost)
+                if(aArr[aL*mat.columns() + c] == mMaxCellCost)
                 {
                     res.first = true;
                     res.second.first  = aL;
                     res.second.second = c;
-                    aArr[aL*mMatrix.columns() + c] = val;
+                    aArr[aL*mat.columns() + c] = val;
                 }
             }
         }
       return res;
     }
 
-    std::pair<bool, point> finder::is_moving_down(std::vector<unsigned> &aArr,
-                                                  unsigned aL,
-                                                  unsigned aC)
+    std::pair<bool, point> finder::is_moving_down(unsigned aL,unsigned aC)
     {
         std::pair<bool, point> res{false,{0,0}};
-        if(aL<mMatrix.lines()-1)
+        if(aL<mat.lines()-1)
         {
             auto l   = aL + 1;
-            auto val = aArr[aL*mMatrix.columns() + aC] + 1;
+            auto val = aArr[aL*mat.columns() + aC] + 1;
 
-            if(mMatrix.get(l, aC) == eCell::FINISH)
+            if(mat.get(l, aC) == eCell::FINISH)
                 mIsFound = true;
 
-            if(mMatrix.get(l, aC) == eCell::FREE)
+            if(mat.get(l, aC) == eCell::FREE)
             {
-                if(aArr[l*mMatrix.columns() + aC] == mMaxCellCost)
+                if(aArr[l*mat.columns() + aC] == mMaxCellCost)
                 {
                     res.first = true;
                     res.second.first  = l;
                     res.second.second = aC;
-                    aArr[l*mMatrix.columns() + aC] = val;
+                    aArr[l*mat.columns() + aC] = val;
                 }
             }
         }
       return res;
     }
 
-    void finder::_find_neumann(std::vector<unsigned> &aArr)
+    void finder::generate_wave(std::vector<unsigned> &aArr)
     {
         std::queue<point> _queque;
         _queque.push({mStart.first, mStart.second});
@@ -334,19 +324,19 @@
             point tmp = _queque.front();
             _queque.pop();
 
-            res = is_moving_up(aArr, tmp.first, tmp.second);
+            res = is_moving_up( tmp.first, tmp.second);
             if(res.first == true)
                 _queque.push(res.second);
 
-            res = is_moving_right(aArr, tmp.first, tmp.second);
+            res = is_moving_right( tmp.first, tmp.second);
             if(res.first == true)
                 _queque.push(res.second);
 
-            res = is_moving_down(aArr, tmp.first, tmp.second);
+            res = is_moving_down( tmp.first, tmp.second);
             if(res.first == true)
                 _queque.push(res.second);
 
-            res = is_moving_left(aArr, tmp.first, tmp.second);
+            res = is_moving_left( tmp.first, tmp.second);
             if(res.first == true)
                 _queque.push(res.second);
         }
@@ -367,41 +357,40 @@
         auto left = val;
         
         
-        while(!mPath.empty())
-            mPath.pop();
 
         for(;;)
         {
             index = 0;
-            if((ln-1) > mMatrix.lines()-1||cn > mMatrix.columns()-1)
+            if((ln-1) > mat.lines()-1||cn > mat.columns()-1)
                 up = val;
             else
-                up = aArr[ (ln - 1)*mMatrix.columns() + cn];
+                up = aArr[ (ln - 1)*mat.columns() + cn];
             
             
-            if(ln > mMatrix.lines()-1||(cn+1) > mMatrix.columns()-1)
+            if(ln > mat.lines()-1||(cn+1) > mat.columns()-1)
                 right = val;
             else
-                right = aArr[ ln*mMatrix.columns() + (cn + 1)];
+                right = aArr[ ln*mat.columns() + (cn + 1)];
             
        
-            if((ln+1) > mMatrix.lines()-1||cn > mMatrix.columns()-1)
+            if((ln+1) > mat.lines()-1||cn > mat.columns()-1)
                 down = val;
             else
-                down = aArr[ (ln + 1)*mMatrix.columns() + cn];
+                down = aArr[ (ln + 1)*mat.columns() + cn];
             
        
-            if(ln > mMatrix.lines()-1||(cn-1) > mMatrix.columns()-1)
+            if(ln > mat.lines()-1||(cn-1) > mat.columns()-1)
                 left = val;
             else
-                left = aArr[ ln*mMatrix.columns() + (cn - 1)];
+                left = aArr[ ln*mat.columns() + (cn - 1)];
        
 
             if(down < val && down <= left && down <= up && down <= right) { val = down; index = 1; }
             if(left < val && left <= down && left <= up && left <= right) { val = left; index = 3; }
             if(up < val && up <= down && up <= left && up <= right) { val = up; index = 5; }
             if(right < val && right <= down && right <= left && right <= up) { val = right; index = 7; }
-
+            if(val == 0)
+                index = 0;
 
             switch(index)
             {
@@ -409,35 +398,31 @@
                 {
                     return;
                 }
-                case 1: // up
+                case 1:
                 {
                     dl = 1;
-                    mPath.push({eDirection::DOWN, {ln+dl, cn+dc}});
-                    mMatrix.insert(ln+dl, cn+dc, eCell::WAY);
+                    mat.insert(ln+dl, cn+dc, eCell::WAY);
                     break;
                 }
           
-                case 3: // right
+                case 3:
                 {
                     dc = -1;
-                    mPath.push({eDirection::LEFT, {ln+dl, cn+dc}});
-                    mMatrix.insert(ln+dl, cn+dc, eCell::WAY);
+                    mat.insert(ln+dl, cn+dc, eCell::WAY);
                     break;
                 }
           
-                case 5: // down
+                case 5:
                 {
                     dl = -1;
-                    mPath.push({eDirection::UP, {ln+dl, cn+dc}});
-                    mMatrix.insert(ln+dl, cn+dc, eCell::WAY);
+                    mat.insert(ln+dl, cn+dc, eCell::WAY);
                     break;
                 }
           
-                case 7: // left
+                case 7:
                 {
                     dc = 1;
-                    mPath.push({eDirection::RIGHT, {ln+dl, cn+dc}});
-                    mMatrix.insert(ln+dl, cn+dc, eCell::WAY);
+                    mat.insert(ln+dl, cn+dc, eCell::WAY);
                     break;
                 }
           
