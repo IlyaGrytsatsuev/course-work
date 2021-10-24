@@ -61,16 +61,16 @@ using point = std::pair<unsigned, unsigned>;
             point mStart{0,0};
             point mFinish{0,0};
             WayMatrix &mat;
-            std::vector<unsigned> aArr;
+            std::vector<unsigned> wave;
 
         public:
             
-            finder( WayMatrix&);
+            finder(WayMatrix& aMatrix);
             void find();
             std::pair<point, point> find_start_finish();
             const bool &isFound()const;
-            void generate_wave(std::vector<unsigned>&);
-            void _patch_building(std::vector<unsigned>&);
+            void generate_wave();
+            void _patch_building();
             void file_output(const char* str);
 
             std::pair<bool, point> is_moving_up(unsigned aL, unsigned aC);

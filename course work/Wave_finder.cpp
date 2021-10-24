@@ -132,21 +132,23 @@
           mStart  = res.first;
           mFinish = res.second;
           mMaxCellCost = aMatrix.columns() * aMatrix.lines();
-          aArr.resize(mat.lines() * mat.columns(),mMaxCellCost);
+          wave.resize(mat.lines() * mat.columns(),mMaxCellCost);
     }
 
 
     void finder::find()
     {
 
-        aArr[mStart.first * mat.columns() + mStart.second] = 0;
+        wave[mStart.first * mat.columns() + mStart.second] = 0;
           
           mIsFound = false;
 
-        generate_wave(aArr);
+        generate_wave();
           
           if(mIsFound)
-              _patch_building(aArr);
+              _patch_building();
+          else
+              throw "WAY IS NOT FOUND !!!";
     
     }
 
@@ -216,19 +218,19 @@
         if(aL>0)
         {
             auto l   = aL - 1;
-            auto val = aArr[aL*mat.columns() + aC] + 1;
+            auto val = wave[aL*mat.columns() + aC] + 1;
 
             if(mat.get(l, aC) == eCell::FINISH)
                 mIsFound = true;
 
             if(mat.get(l, aC) == eCell::FREE)
             {
-                if(aArr[l*mat.columns() + aC] == mMaxCellCost)
+                if(wave[l*mat.columns() + aC] == mMaxCellCost)
                 {
                     res.first         = true;
                     res.second.first  = l;
                     res.second.second = aC;
-                    aArr[l*mat.columns() + aC] = val;
+                    wave[l*mat.columns() + aC] = val;
                 }
             }
         }
@@ -242,19 +244,19 @@
         if(aC>0)
         {
             auto c   = aC - 1;
-            auto val = aArr[aL*mat.columns() + aC] + 1;
+            auto val = wave[aL*mat.columns() + aC] + 1;
 
             if(mat.get(aL, c) == eCell::FINISH)
                 mIsFound = true;
 
             if(mat.get(aL, c) == eCell::FREE)
             {
-                if(aArr[aL*mat.columns() + c] == mMaxCellCost)
+                if(wave[aL*mat.columns() + c] == mMaxCellCost)
                 {
                     res.first         = true;
                     res.second.first  = aL;
                     res.second.second = c;
-                    aArr[aL*mat.columns() + c] = val;
+                    wave[aL*mat.columns() + c] = val;
                 }
             }
         }
@@ -268,19 +270,19 @@
         if(aC<mat.columns() - 1)
         {
             auto c   = aC + 1;
-            auto val = aArr[aL*mat.columns() + aC] + 1;
+            auto val = wave[aL*mat.columns() + aC] + 1;
 
             if(mat.get(aL, c) == eCell::FINISH)
                 mIsFound = true;
 
             if(mat.get(aL, c) == eCell::FREE)
             {
-                if(aArr[aL*mat.columns() + c] == mMaxCellCost)
+                if(wave[aL*mat.columns() + c] == mMaxCellCost)
                 {
                     res.first = true;
                     res.second.first  = aL;
                     res.second.second = c;
-                    aArr[aL*mat.columns() + c] = val;
+                    wave[aL*mat.columns() + c] = val;
                 }
             }
         }
@@ -293,26 +295,26 @@
         if(aL<mat.lines()-1)
         {
             auto l   = aL + 1;
-            auto val = aArr[aL*mat.columns() + aC] + 1;
+            auto val = wave[aL*mat.columns() + aC] + 1;
 
             if(mat.get(l, aC) == eCell::FINISH)
                 mIsFound = true;
 
             if(mat.get(l, aC) == eCell::FREE)
             {
-                if(aArr[l*mat.columns() + aC] == mMaxCellCost)
+                if(wave[l*mat.columns() + aC] == mMaxCellCost)
                 {
                     res.first = true;
                     res.second.first  = l;
                     res.second.second = aC;
-                    aArr[l*mat.columns() + aC] = val;
+                    wave[l*mat.columns() + aC] = val;
                 }
             }
         }
       return res;
     }
 
-    void finder::generate_wave(std::vector<unsigned> &aArr)
+    void finder::generate_wave()
     {
         std::queue<point> _queque;
         _queque.push({mStart.first, mStart.second});
@@ -342,7 +344,7 @@
         }
     }
 
-    void finder::_patch_building(std::vector<unsigned> &aArr)
+    void finder::_patch_building()
     {
         auto ln   = mFinish.first ;
         auto cn   = mFinish.second ;
@@ -364,25 +366,25 @@
             if((ln-1) > mat.lines()-1||cn > mat.columns()-1)
                 up = val;
             else
-                up = aArr[ (ln - 1)*mat.columns() + cn];
+                up = wave[ (ln - 1)*mat.columns() + cn];
             
             
             if(ln > mat.lines()-1||(cn+1) > mat.columns()-1)
                 right = val;
             else
-                right = aArr[ ln*mat.columns() + (cn + 1)];
+                right = wave[ ln*mat.columns() + (cn + 1)];
             
        
             if((ln+1) > mat.lines()-1||cn > mat.columns()-1)
                 down = val;
             else
-                down = aArr[ (ln + 1)*mat.columns() + cn];
+                down = wave[ (ln + 1)*mat.columns() + cn];
             
        
             if(ln > mat.lines()-1||(cn-1) > mat.columns()-1)
                 left = val;
             else
-                left = aArr[ ln*mat.columns() + (cn - 1)];
+                left = wave[ ln*mat.columns() + (cn - 1)];
        
 
             if(down < val && down <= left && down <= up && down <= right) { val = down; index = 1; }
