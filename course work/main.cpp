@@ -19,18 +19,19 @@ int main ()
         
         char str[128];
         cout<<" Enter the path to the file for downloading:\n";
-        gets(str);
-        
+        fgets(str, 127, stdin);
+
         WayMatrix mat;
         mat.get_data(str);
         finder a(mat);
         a.find();
-        cout<<" \nWay is found\n";
+        cout<<" \nWay is found\n\n";
             
         cout<<" Enter the path to the file for uploading:\n";
-        gets(str);
+        fgets(str, 127, stdin);
+        
         a.file_output(str);
-        cout<<"\nUpload is success !\n";
+        cout<<"\nUpload is success !\n\n";
     }
     
     catch (const char* s){

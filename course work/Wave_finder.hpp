@@ -71,7 +71,7 @@ using point = std::pair<unsigned, unsigned>;
             const bool &isFound()const;
             void generate_wave();
             void _patch_building();
-            void file_output(const char* str);
+            void file_output(char* str);
 
             std::pair<bool, point> is_moving_up(unsigned aL, unsigned aC);
             std::pair<bool, point> is_moving_left( unsigned aL, unsigned aC);

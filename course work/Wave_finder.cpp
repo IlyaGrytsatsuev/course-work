@@ -30,7 +30,11 @@
 
     void WayMatrix::get_data(char*str)
     {
-              std::ifstream file{str};
+            for(int i = 0; i < 128; i++){
+                if(str[i] == '\n')
+                    str[i] = '\0';
+            }
+            std::ifstream file{str};
 
               if(file.is_open())
               {
@@ -77,7 +81,6 @@
                         }
                     }
               }
-              
               else
                   throw "File is not open";
         }
@@ -153,9 +156,12 @@
     }
 
 
-    void finder:: file_output(const char* str)
+    void finder:: file_output( char* str)
     {
-            //eCell cell = START;
+            for(int i = 0; i < 128; i++){
+                if(str[i] == '\n')
+                    str[i] = '\0';
+            }
             std::ofstream out{str};
 
               if(out.is_open())
