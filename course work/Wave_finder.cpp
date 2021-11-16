@@ -30,10 +30,6 @@
 
     void WayMatrix::get_data(char*str)
     {
-            for(int i = 0; i < 128; i++){
-                if(str[i] == '\n')
-                    str[i] = '\0';
-            }
             std::ifstream file{str};
 
               if(file.is_open())
@@ -144,13 +140,13 @@
 
         wave[mStart.first * mat.columns() + mStart.second] = 0;
           
-          mIsFound = false;
+        mIsFound = false;
 
         generate_wave();
           
-          if(mIsFound)
+        if(mIsFound)
               _patch_building();
-          else
+        else
               throw "WAY IS NOT FOUND !!!";
     
     }
@@ -158,10 +154,6 @@
 
     void finder:: file_output( char* str)
     {
-            for(int i = 0; i < 128; i++){
-                if(str[i] == '\n')
-                    str[i] = '\0';
-            }
             std::ofstream out{str};
 
               if(out.is_open())

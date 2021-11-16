@@ -2,36 +2,26 @@
 #include <iostream>
 using namespace std;
 
-int main ()
+int main (int argc, char* argv[])
 {
     try {
-    // FILES:
-        
-    // /Users/gratchuvalsky/Desktop/mat1.txt
-      //  /Users/gratchuvalsky/Desktop/output1.txt
-        
-       // /Users/gratchuvalsky/Desktop/mat2.txt
-        // /Users/gratchuvalsky/Desktop/output2.txt
-        
-        // /Users/gratchuvalsky/Desktop/mat3.txt
-        // /Users/gratchuvalsky/Desktop/output3.txt
-        
-        
-        char str[128];
-        cout<<" Enter the path to the file for downloading:\n";
-        fgets(str, 127, stdin);
 
-        WayMatrix mat;
-        mat.get_data(str);
-        finder a(mat);
-        a.find();
-        cout<<" \nWay is found\n\n";
-            
-        cout<<" Enter the path to the file for uploading:\n";
-        fgets(str, 127, stdin);
+        char* str;
         
-        a.file_output(str);
-        cout<<"\nUpload is success !\n\n";
+        for(int i = 1; i < argc; i++)
+        {
+            WayMatrix mat;
+            str = argv[i];
+            mat.get_data(str);
+            finder a(mat);
+            a.find();
+            str = argv[i+1];
+            a.file_output(str);
+            i++;
+            
+        }
+        cout<<" \nWays are found\n\n";
+            
     }
     
     catch (const char* s){
