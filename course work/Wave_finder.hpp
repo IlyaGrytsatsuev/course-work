@@ -23,9 +23,13 @@
     enum  eDirection
     {
         UP
+        ,UP_RIGHT
         ,RIGHT
+        ,DOWN_RIGHT
         ,DOWN
+        ,DOWN_LEFT
         ,LEFT
+        ,UP_LEFT
     };
 
 using point = std::pair<unsigned, unsigned>;
@@ -74,9 +78,13 @@ using point = std::pair<unsigned, unsigned>;
             void file_output(char* str);
 
             std::pair<bool, point> is_moving_up(unsigned aL, unsigned aC);
+            std::pair<bool, point> is_moving_up_right (unsigned aL, unsigned aC);
             std::pair<bool, point> is_moving_left( unsigned aL, unsigned aC);
+            std::pair<bool, point> is_moving_up_left (unsigned aL, unsigned aC);
             std::pair<bool, point> is_moving_right( unsigned aL, unsigned aC);
+            std::pair<bool, point> is_moving_down_right (unsigned aL, unsigned aC);
             std::pair<bool, point> is_moving_down( unsigned aL, unsigned aC);
+            std::pair<bool, point> is_moving_down_left (unsigned aL, unsigned aC);
 
     };
 

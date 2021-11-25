@@ -21,7 +21,7 @@
 
     void WayMatrix::insert(unsigned aLine,unsigned aColumn, eCell aCell)
     {
-        if(aLine >= mLines || aColumn > mColumns)
+        if(aLine >= mLines || aLine < 0 || aColumn > mColumns || aColumn < 0)
             throw "ERROR!!! DEFINITION IS OUT OF RANGE!!";
         
         mMatrix[aLine*mColumns + aColumn] = aCell;
@@ -219,6 +219,7 @@
             auto val = wave[aL*mat.columns() + aC] + 1;
 
             if(mat.get(l, aC) == eCell::FINISH)
+                wave[l*mat.columns() + aC] = val;
                 mIsFound = true;
 
             if(mat.get(l, aC) == eCell::FREE)
@@ -229,6 +230,34 @@
                     res.second.first  = l;
                     res.second.second = aC;
                     wave[l*mat.columns() + aC] = val;
+                }
+            }
+        }
+      return res;
+    }
+
+    std::pair<bool, point> finder::is_moving_up_right (unsigned aL, unsigned aC)
+    {
+        std::pair<bool, point> res{false,{0,0}};
+
+        if(aL>0 && (aC < mat.columns() - 1) )
+        {
+            auto l = aL - 1;
+            auto c = aC + 1;
+            auto val = wave[aL*mat.columns() + aC] + 1;
+
+            if(mat.get(l, c) == eCell::FINISH)
+                wave[l*mat.columns() + c] = val;
+                mIsFound = true;
+
+            if(mat.get(l, c) == eCell::FREE)
+            {
+                if(wave[l*mat.columns() + c] == mMaxCellCost)
+                {
+                    res.first         = true;
+                    res.second.first  = l;
+                    res.second.second = c;
+                    wave[l*mat.columns() + c] = val;
                 }
             }
         }
@@ -245,6 +274,7 @@
             auto val = wave[aL*mat.columns() + aC] + 1;
 
             if(mat.get(aL, c) == eCell::FINISH)
+                wave[aL*mat.columns() + c] = val;
                 mIsFound = true;
 
             if(mat.get(aL, c) == eCell::FREE)
@@ -261,6 +291,33 @@
       return res;
     }
 
+    std::pair<bool, point> finder::is_moving_up_left (unsigned aL, unsigned aC)
+    {
+        std::pair<bool, point> res{false,{0,0}};
+
+        if(aL>0 && aC>0)
+        {
+            auto l = aL - 1;
+            auto c = aC - 1;
+            auto val = wave[aL*mat.columns() + aC] + 1;
+
+            if(mat.get(l, c) == eCell::FINISH)
+                wave[l*mat.columns() + c] = val;
+                mIsFound = true;
+
+            if(mat.get(l, c) == eCell::FREE)
+            {
+                if(wave[l*mat.columns() + c] == mMaxCellCost)
+                {
+                    res.first = true;
+                    res.second.first  = l;
+                    res.second.second = c;
+                    wave[l*mat.columns() + c] = val;
+                }
+            }
+        }
+      return res;
+    }
 
     std::pair<bool, point> finder::is_moving_right(unsigned aL, unsigned aC)
     {
@@ -271,6 +328,7 @@
             auto val = wave[aL*mat.columns() + aC] + 1;
 
             if(mat.get(aL, c) == eCell::FINISH)
+                wave[aL*mat.columns() + c] = val;
                 mIsFound = true;
 
             if(mat.get(aL, c) == eCell::FREE)
@@ -287,6 +345,34 @@
       return res;
     }
 
+    std::pair<bool, point> finder::is_moving_down_right (unsigned aL, unsigned aC)
+    {
+        std::pair<bool, point> res{false,{0,0}};
+
+        if( (aL<mat.lines()-1) && (aC<mat.columns() - 1) )
+        {
+            auto l = aL + 1;
+            auto c = aC + 1;
+            auto val = wave[aL*mat.columns() + aC] + 1;
+
+            if(mat.get(l, c) == eCell::FINISH)
+                wave[l*mat.columns() + c] = val;
+                mIsFound = true;
+
+            if(mat.get(l, c) == eCell::FREE)
+            {
+                if(wave[l*mat.columns() + c] == mMaxCellCost)
+                {
+                    res.first = true;
+                    res.second.first  = l;
+                    res.second.second = c;
+                    wave[l*mat.columns() + c] = val;
+                }
+            }
+        }
+      return res;
+    }
+
     std::pair<bool, point> finder::is_moving_down(unsigned aL,unsigned aC)
     {
         std::pair<bool, point> res{false,{0,0}};
@@ -296,6 +382,7 @@
             auto val = wave[aL*mat.columns() + aC] + 1;
 
             if(mat.get(l, aC) == eCell::FINISH)
+                wave[l*mat.columns() + aC] = val;
                 mIsFound = true;
 
             if(mat.get(l, aC) == eCell::FREE)
@@ -306,6 +393,34 @@
                     res.second.first  = l;
                     res.second.second = aC;
                     wave[l*mat.columns() + aC] = val;
+                }
+            }
+        }
+      return res;
+    }
+
+    std::pair<bool, point> finder::is_moving_down_left (unsigned aL, unsigned aC)
+    {
+        std::pair<bool, point> res{false,{0,0}};
+
+        if( (aL<mat.lines()-1) && aC>0 )
+        {
+            auto l = aL + 1;
+            auto c = aC - 1;
+            auto val = wave[aL*mat.columns() + aC] + 1;
+
+            if(mat.get(l, c) == eCell::FINISH)
+                wave[l*mat.columns() + c] = val;
+                mIsFound = true;
+
+            if(mat.get(l, c) == eCell::FREE)
+            {
+                if(wave[l*mat.columns() + c] == mMaxCellCost)
+                {
+                    res.first = true;
+                    res.second.first  = l;
+                    res.second.second = c;
+                    wave[l*mat.columns() + c] = val;
                 }
             }
         }
@@ -327,26 +442,44 @@
             res = is_moving_up( tmp.first, tmp.second);
             if(res.first == true)
                 _queque.push(res.second);
+            
+            res = is_moving_up_right( tmp.first, tmp.second);
+            if(res.first == true)
+                _queque.push(res.second);
 
             res = is_moving_right( tmp.first, tmp.second);
+            if(res.first == true)
+                _queque.push(res.second);
+            
+            res = is_moving_up_left( tmp.first, tmp.second);
             if(res.first == true)
                 _queque.push(res.second);
 
             res = is_moving_down( tmp.first, tmp.second);
             if(res.first == true)
                 _queque.push(res.second);
+            
+            res = is_moving_down_right( tmp.first, tmp.second);
+            if(res.first == true)
+                _queque.push(res.second);
 
             res = is_moving_left( tmp.first, tmp.second);
+            if(res.first == true)
+                _queque.push(res.second);
+            
+            res = is_moving_down_left( tmp.first, tmp.second);
             if(res.first == true)
                 _queque.push(res.second);
         }
     }
 
+    
+
     void finder::_patch_building()
     {
-        auto ln   = mFinish.first ;
-        auto cn   = mFinish.second ;
-        auto val = mMaxCellCost;
+        auto ln  = mFinish.first;
+        auto cn  = mFinish.second;
+        auto val = wave[ln*mat.columns() + cn];
         auto index = 0;
         auto dl = 0;
         auto dc = 0;
@@ -355,43 +488,69 @@
         auto down = val;
         auto right = val;
         auto left = val;
-        
+        auto up_right = val;
+        auto up_left = val;
+        auto down_right = val;
+        auto down_left = val;
         
 
         for(;;)
         {
             index = 0;
-            if((ln-1) > mat.lines()-1||cn > mat.columns()-1)
+            
+            if((ln-1) < 0||cn > mat.columns()-1)
                 up = val;
             else
                 up = wave[ (ln - 1)*mat.columns() + cn];
             
+            if((ln-1) < 0 ||(cn+1) > mat.columns()-1)
+                up_right = val;
+            else
+                up_right = wave[(ln - 1)*mat.columns() + (cn + 1)];
             
-            if(ln > mat.lines()-1||(cn+1) > mat.columns()-1)
+            if((cn+1) > mat.columns()-1)
                 right = val;
             else
                 right = wave[ ln*mat.columns() + (cn + 1)];
             
-       
-            if((ln+1) > mat.lines()-1||cn > mat.columns()-1)
-                down = val;
+            if((ln+1) > mat.lines()-1||(cn+1) > mat.columns()-1)
+                down_right = val;
             else
-                down = wave[ (ln + 1)*mat.columns() + cn];
+                down_right = wave[(ln + 1)*mat.columns() + (cn + 1)];
             
        
-            if(ln > mat.lines()-1||(cn-1) > mat.columns()-1)
+            if((ln+1) > mat.lines()-1)
+                down = val;
+            else
+                down = wave[(ln + 1)*mat.columns() + cn];
+            
+            if((ln+1) > mat.lines()-1||(cn-1) < 0)
+                down_left = val;
+            else
+                down_left  = wave[(ln + 1)*mat.columns() + (cn - 1)];
+       
+            if((cn-1) < 0)
                 left = val;
             else
                 left = wave[ ln*mat.columns() + (cn - 1)];
+            
+            if((ln-1) < 0 ||(cn-1) < 0)
+                up_left = val;
+            else
+                up_left = wave[(ln - 1)*mat.columns() + (cn - 1)];
        
 
-            if(down < val && down <= left && down <= up && down <= right) { val = down; index = 1; }
-            if(left < val && left <= down && left <= up && left <= right) { val = left; index = 3; }
-            if(up < val && up <= down && up <= left && up <= right) { val = up; index = 5; }
-            if(right < val && right <= down && right <= left && right <= up) { val = right; index = 7; }
-            if(val == 0)
-                index = 0;
+            if(down == val-1) { val = down; index = 1; }
+            if(left  == val-1) { val = left; index = 2;  }
+            if(up  == val-1) { val = up; index = 3; }
+            if(right  == val-1) { val = right; index = 4; }
+            if(up_right  == val-1) { val = up_right; index = 5; }
+            if(up_left  == val-1) { val = up_left; index = 6; }
+            if(down_right  == val-1) { val = down_right; index = 7; }
+            if(down_left  == val-1) { val = down_left; index = 8; }
+            if(val == 0) { index = 0; }
 
+            
             switch(index)
             {
                 case 0:
@@ -405,27 +564,58 @@
                     break;
                 }
           
-                case 3:
+                case 2:
                 {
                     dc = -1;
                     mat.insert(ln+dl, cn+dc, eCell::WAY);
                     break;
                 }
           
-                case 5:
+                case 3:
                 {
                     dl = -1;
                     mat.insert(ln+dl, cn+dc, eCell::WAY);
                     break;
                 }
           
-                case 7:
+                case 4:
                 {
                     dc = 1;
                     mat.insert(ln+dl, cn+dc, eCell::WAY);
                     break;
                 }
+                    
+                case 5:
+                {
+                    dl = -1;
+                    dc = 1;
+                    mat.insert(ln+dl, cn+dc, eCell::WAY);
+                    break;
+                }
+                
+                case 6:
+                {
+                    dl = -1;
+                    dc = -1;
+                    mat.insert(ln+dl, cn+dc, eCell::WAY);
+                    break;
+                }
+                    
+                case 7:
+                {
+                    dl = 1;
+                    dc = 1;
+                    mat.insert(ln+dl, cn+dc, eCell::WAY);
+                    break;
+                }
           
+                case 8:
+                {
+                    dl = 1;
+                    dc = -1;
+                    mat.insert(ln+dl, cn+dc, eCell::WAY);
+                    break;
+                }
             }
             
             ln += dl;
